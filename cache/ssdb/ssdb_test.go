@@ -1,7 +1,7 @@
 package ssdb
 
 import (
-	"github.com/astaxie/beego/cache"
+	"github.com/xxoommd/beego/cache"
 	"strconv"
 	"testing"
 	"time"

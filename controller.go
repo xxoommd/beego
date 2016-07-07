@@ -27,8 +27,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/astaxie/beego/context"
-	"github.com/astaxie/beego/session"
+	"github.com/xxoommd/beego/context"
+	"github.com/xxoommd/beego/session"
 )
 
 //commonly used mime-types

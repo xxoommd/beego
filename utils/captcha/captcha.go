@@ -19,9 +19,9 @@
 // package controllers
 //
 // import (
-// 	"github.com/astaxie/beego"
-// 	"github.com/astaxie/beego/cache"
-// 	"github.com/astaxie/beego/utils/captcha"
+// 	"github.com/xxoommd/beego"
+// 	"github.com/xxoommd/beego/cache"
+// 	"github.com/xxoommd/beego/utils/captcha"
 // )
 //
 // var cpt *captcha.Captcha
@@ -66,10 +66,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/cache"
-	"github.com/astaxie/beego/context"
-	"github.com/astaxie/beego/utils"
+	"github.com/xxoommd/beego"
+	"github.com/xxoommd/beego/cache"
+	"github.com/xxoommd/beego/context"
+	"github.com/xxoommd/beego/utils"
 )
 
 var (
