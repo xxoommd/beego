@@ -69,6 +69,7 @@ import (
 	"github.com/xxoommd/beego"
 	"github.com/xxoommd/beego/cache"
 	"github.com/xxoommd/beego/context"
+	"github.com/xxoommd/beego/logs"
 	"github.com/xxoommd/beego/utils"
 )
 
@@ -139,7 +140,7 @@ func (c *Captcha) Handler(ctx *context.Context) {
 		if err := c.store.Put(key, chars, c.Expiration); err != nil {
 			ctx.Output.SetStatus(500)
 			ctx.WriteString("captcha reload error")
-			beego.Error("Reload Create Captcha Error:", err)
+			logs.Error("Reload Create Captcha Error:", err)
 			return
 		}
 	} else {
@@ -154,7 +155,7 @@ func (c *Captcha) Handler(ctx *context.Context) {
 
 	img := NewImage(chars, c.StdWidth, c.StdHeight)
 	if _, err := img.WriteTo(ctx.ResponseWriter); err != nil {
-		beego.Error("Write Captcha Image Error:", err)
+		logs.Error("Write Captcha Image Error:", err)
 	}
 }
 
@@ -162,7 +163,7 @@ func (c *Captcha) Handler(ctx *context.Context) {
 func (c *Captcha) CreateCaptchaHTML() template.HTML {
 	value, err := c.CreateCaptcha()
 	if err != nil {
-		beego.Error("Create Captcha Error:", err)
+		logs.Error("Create Captcha Error:", err)
 		return ""
 	}
 

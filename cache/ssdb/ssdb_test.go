@@ -1,10 +1,11 @@
 package ssdb
 
 import (
-	"github.com/xxoommd/beego/cache"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/xxoommd/beego/cache"
 )
 
 func TestSsdbcacheCache(t *testing.T) {

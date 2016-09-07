@@ -1,4 +1,4 @@
-// Copyright 2014 beego Author. All Rights Reserved.
+// Copyright 2016 beego Author. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,15 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pagination
+package utils
 
-import (
-	"github.com/xxoommd/beego/context"
-)
+import "testing"
 
-// SetPaginator Instantiates a Paginator and assigns it to context.Input.Data("paginator").
-func SetPaginator(context *context.Context, per int, nums int64) (paginator *Paginator) {
-	paginator = NewPaginator(context.Request, per, nums)
-	context.Input.SetData("paginator", &paginator)
-	return
+func TestRand_01(t *testing.T) {
+	bs0 := RandomCreateBytes(16)
+	bs1 := RandomCreateBytes(16)
+
+	t.Log(string(bs0), string(bs1))
+	if string(bs0) == string(bs1) {
+		t.FailNow()
+	}
+
+	bs0 = RandomCreateBytes(4, []byte(`a`)...)
+
+	if string(bs0) != "aaaa" {
+		t.FailNow()
+	}
 }
