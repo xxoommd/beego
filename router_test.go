@@ -120,15 +120,10 @@ func TestUrlFor2(t *testing.T) {
 	handler.Add("/v1/:username/edit", &TestController{}, "get:GetURL")
 	handler.Add("/v1/:v(.+)_cms/ttt_:id(.+)_:page(.+).html", &TestController{}, "*:Param")
 	handler.Add("/:year:int/:month:int/:title/:entid", &TestController{})
-<<<<<<< HEAD
-	if handler.URLFor("TestController.GetURL", ":username", "astaxie") != "/v1/xxoommd/edit" {
-		Info(handler.URLFor("TestController.GetURL"))
-		t.Errorf("TestController.List must equal to /v1/xxoommd/edit")
-=======
+
 	if handler.URLFor("TestController.GetURL", ":username", "astaxie") != "/v1/astaxie/edit" {
 		logs.Info(handler.URLFor("TestController.GetURL"))
 		t.Errorf("TestController.List must equal to /v1/astaxie/edit")
->>>>>>> 98740fddac7c5c0df83ea31b751a87e317d28163
 	}
 
 	if handler.URLFor("TestController.List", ":v", "za", ":id", "12", ":page", "123") !=

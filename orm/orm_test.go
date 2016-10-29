@@ -227,7 +227,7 @@ func TestModelSyntax(t *testing.T) {
 	user := &User{}
 	ind := reflect.ValueOf(user).Elem()
 	fn := getFullName(ind.Type())
-	mi, ok := modelCache.getByFN(fn)
+	mi, ok := modelCache.getByFullName(fn)
 	throwFail(t, AssertIs(ok, true))
 
 	mi, ok = modelCache.get("user")
@@ -577,6 +577,10 @@ func TestCRUD(t *testing.T) {
 	err = dORM.Read(&ub)
 	throwFail(t, err)
 	throwFail(t, AssertIs(ub.Name, "name"))
+
+	num, err = dORM.Delete(&ub, "name")
+	throwFail(t, err)
+	throwFail(t, AssertIs(num, 1))
 }
 
 func TestInsertTestData(t *testing.T) {

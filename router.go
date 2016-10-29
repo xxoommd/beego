@@ -626,7 +626,9 @@ func (p *ControllerRegister) ServeHTTP(rw http.ResponseWriter, r *http.Request) 
 	context.Reset(rw, r)
 
 	defer p.pool.Put(context)
-	defer p.recoverPanic(context)
+	if BConfig.RecoverFunc != nil {
+		defer BConfig.RecoverFunc(context)
+	}
 
 	context.Output.EnableGzip = BConfig.EnableGzip
 
@@ -683,8 +685,16 @@ func (p *ControllerRegister) ServeHTTP(rw http.ResponseWriter, r *http.Request) 
 	if len(p.filters[BeforeRouter]) > 0 && p.execFilter(context, urlPath, BeforeRouter) {
 		goto Admin
 	}
+	// User can define RunController and RunMethod in filter
+	if context.Input.RunController != nil && context.Input.RunMethod != "" {
+		findRouter = true
+		isRunnable = true
+		runMethod = context.Input.RunMethod
+		runRouter = context.Input.RunController
+	} else {
+		routerInfo, findRouter = p.FindRouter(context)
+	}
 
-	routerInfo, findRouter = p.FindRouter(context)
 	//if no matches to url, throw a not found exception
 	if !findRouter {
 		exception("404", context)
@@ -696,15 +706,16 @@ func (p *ControllerRegister) ServeHTTP(rw http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	//store router pattern into context
-	context.Input.SetData("RouterPattern", routerInfo.pattern)
-
 	//execute middleware filters
 	if len(p.filters[BeforeExec]) > 0 && p.execFilter(context, urlPath, BeforeExec) {
 		goto Admin
 	}
 
 	if routerInfo != nil {
+		if BConfig.RunMode == DEV {
+			//store router pattern into context
+			context.Input.SetData("RouterPattern", routerInfo.pattern)
+		}
 		if routerInfo.routerType == routerTypeRESTFul {
 			if _, ok := routerInfo.methods[r.Method]; ok {
 				isRunnable = true
@@ -838,16 +849,16 @@ Admin:
 
 		if findRouter {
 			if routerInfo != nil {
-				devInfo = fmt.Sprintf("|%s %3d %s|%13s|%8s|%s %s %-7s %-3s   r:%s", statusColor, statusCode,
-					resetColor, timeDur.String(), "match", methodColor, resetColor, r.Method, r.URL.Path,
+				devInfo = fmt.Sprintf("|%15s|%s %3d %s|%13s|%8s|%s %-7s %s %-3s   r:%s", context.Input.IP(), statusColor, statusCode,
+					resetColor, timeDur.String(), "match", methodColor, r.Method, resetColor, r.URL.Path,
 					routerInfo.pattern)
 			} else {
-				devInfo = fmt.Sprintf("|%s %3d %s|%13s|%8s|%s %s %-7s %-3s", statusColor, statusCode, resetColor,
-					timeDur.String(), "match", methodColor, resetColor, r.Method, r.URL.Path)
+				devInfo = fmt.Sprintf("|%15s|%s %3d %s|%13s|%8s|%s %-7s %s %-3s", context.Input.IP(), statusColor, statusCode, resetColor,
+					timeDur.String(), "match", methodColor, r.Method, resetColor, r.URL.Path)
 			}
 		} else {
-			devInfo = fmt.Sprintf("|%s %3d %s|%13s|%8s|%s %s %-7s %-3s", statusColor, statusCode, resetColor,
-				timeDur.String(), "nomatch", methodColor, resetColor, r.Method, r.URL.Path)
+			devInfo = fmt.Sprintf("|%15s|%s %3d %s|%13s|%8s|%s %-7s %s %-3s", context.Input.IP(), statusColor, statusCode, resetColor,
+				timeDur.String(), "nomatch", methodColor, r.Method, resetColor, r.URL.Path)
 		}
 		if iswin {
 			logs.W32Debug(devInfo)
@@ -876,37 +887,6 @@ func (p *ControllerRegister) FindRouter(context *beecontext.Context) (routerInfo
 		}
 	}
 	return
-}
-
-func (p *ControllerRegister) recoverPanic(context *beecontext.Context) {
-	if err := recover(); err != nil {
-		if err == ErrAbort {
-			return
-		}
-		if !BConfig.RecoverPanic {
-			panic(err)
-		}
-		if BConfig.EnableErrorsShow {
-			if _, ok := ErrorMaps[fmt.Sprint(err)]; ok {
-				exception(fmt.Sprint(err), context)
-				return
-			}
-		}
-		var stack string
-		logs.Critical("the request url is ", context.Input.URL())
-		logs.Critical("Handler crashed with error", err)
-		for i := 1; ; i++ {
-			_, file, line, ok := runtime.Caller(i)
-			if !ok {
-				break
-			}
-			logs.Critical(fmt.Sprintf("%s:%d", file, line))
-			stack = stack + fmt.Sprintln(fmt.Sprintf("%s:%d", file, line))
-		}
-		if BConfig.RunMode == DEV {
-			showErr(err, context, stack)
-		}
-	}
 }
 
 func toURL(params map[string]string) string {
